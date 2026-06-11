@@ -15,7 +15,7 @@ import random
 # PAGE CONFIG
 # ─────────────────────────────────────────────
 st.set_page_config(
-    page_title="Cerelog — Seizure Diary",
+    page_title="SeizureSense - Seizure Pattern Diary",
     page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -563,8 +563,9 @@ def chatbot_response(user_input):
 # SIDEBAR
 # ─────────────────────────────────────────────
 with st.sidebar:
-    st.markdown(f'<div class="main-header" style="font-size:1.5rem;">🧠 CERELOG</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="sub-header">Seizure Pattern Diary</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="main-header" style="font-size:1.5rem;">🧠 SEIZURESENSE</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sub-header">Know your brain. Predict your risk.</div>', unsafe_allow_html=True)
+st.markdown(f'<div style="font-size:0.75rem; color:{C[\'dim\']}; font-family:Space Mono, monospace;">Built by [CHANGE THIS — your name]</div>', unsafe_allow_html=True)
     st.markdown("---")
 
     st.markdown('<div class="section-title">Color Theme</div>', unsafe_allow_html=True)
@@ -611,7 +612,7 @@ if st.session_state.show_confetti:
     show_confetti()
     st.session_state.show_confetti = False
 
-st.markdown(f'<div class="main-header">CERELOG</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="main-header">SEIZURESENSE</div>', unsafe_allow_html=True)
 st.markdown(f'<div class="sub-header">AI-powered seizure pattern diary — log, detect, predict</div>', unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
