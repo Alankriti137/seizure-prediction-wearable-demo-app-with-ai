@@ -15,7 +15,7 @@ import random
 # PAGE CONFIG
 # ─────────────────────────────────────────────
 st.set_page_config(
-    page_title="Cerelog — Seizure Diary",
+    page_title="SeizureSense — Seizure Pattern Diary",
     page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -68,6 +68,10 @@ if "scheme_name" not in st.session_state:
     st.session_state.scheme_name = "🌊 Navy & Gold"
 if "show_confetti" not in st.session_state:
     st.session_state.show_confetti = False
+if "conditions" not in st.session_state:
+    st.session_state.conditions = []
+if "selected_triggers" not in st.session_state:
+    st.session_state.selected_triggers = {}
 
 C = SCHEMES[st.session_state.scheme_name]
 
@@ -243,7 +247,18 @@ LIFESTYLE_TRIGGERS = [
     "Strobe / flashing lights", "Screens for long time", "Alcohol", "Caffeine",
     "Swimming", "Exercise — intense", "Illness / fever", "Menstrual cycle",
     "Travel / jet lag", "Loud music / concert", "Skipped breakfast",
-    "Dehydration", "Hot weather", "Emotional shock"
+    "Dehydration", "Hot weather", "Emotional shock",
+    "Missed meal", "High blood sugar", "Low blood sugar",
+    "Anxiety episode", "High stress day", "Sleep deprived",
+    "Missed medication", "Pain / migraine", "Photosensitive trigger",
+    "After exercise crash", "REM sleep disrupted",
+    "Mental overload / burnout", "Hormonal change"
+]
+
+CONDITIONS = [
+    "None", "Type 1 Diabetes", "Type 2 Diabetes", "Heart condition",
+    "Autism / ADHD", "Anxiety disorder", "Depression",
+    "Migraine disorder", "Sleep disorder", "Other"
 ]
 
 # ─────────────────────────────────────────────
@@ -543,6 +558,127 @@ def chatbot_response(user_input):
                 f"You have {total_logs} days logged and {total_seizures} seizures recorded. "
                 f"What would you like to know?")
 
+    # SEIZURE DURATION
+    elif any(w in text for w in ["long", "duration", "how long", "last", "minutes", "seconds"]):
+        if seizures:
+            durations = [int(s.get("duration", 0)) for s in seizures if s.get("duration")]
+            if durations:
+                avg_dur = sum(durations) / len(durations)
+                max_dur = max(durations)
+                response = f"**Your seizure duration data:**\n\n"
+                response += f"Average duration: **{avg_dur:.1f} minutes**\n"
+                response += f"Longest recorded: **{max_dur} minutes**\n\n"
+                response += ("Most focal seizures last 1-3 minutes. Generalized tonic-clonic seizures "
+                             "typically last 1-3 minutes as well. A seizure lasting more than 5 minutes "
+                             "is considered a medical emergency (status epilepticus) — call 911.\n\n"
+                             "⚕️ *Share duration patterns with your neurologist.*")
+                return response
+        return ("Most focal seizures last 1-3 minutes. Generalized tonic-clonic seizures "
+                "typically last 1-3 minutes. A seizure lasting more than 5 minutes is a "
+                "medical emergency — call 911 immediately.\n\n"
+                "Log your seizure events in the ⚡ Log Seizure tab to track your own duration patterns.\n\n"
+                "⚕️ *Always discuss seizure duration with your neurologist.*")
+
+    # WHAT TO DO DURING A SEIZURE
+    elif any(w in text for w in ["what to do", "during", "happening", "first aid", "help"]):
+        return ("**What to do during a seizure:**\n\n"
+                "**DO:**\n"
+                "• Stay calm and stay with the person\n"
+                "• Time the seizure\n"
+                "• Gently turn them on their side (recovery position)\n"
+                "• Cushion their head\n"
+                "• Remove glasses, loosen tight clothing\n"
+                "• Stay until they are fully awake\n\n"
+                "**DO NOT:**\n"
+                "• Put anything in their mouth\n"
+                "• Hold them down\n"
+                "• Give water or food until fully conscious\n\n"
+                "**Call 911 if:**\n"
+                "• Seizure lasts more than 5 minutes\n"
+                "• They do not regain consciousness\n"
+                "• It is their first seizure\n"
+                "• They are injured or in water\n\n"
+                "⚕️ *Learn seizure first aid from your neurologist or epilepsy society.*")
+
+    # DIABETES / BLOOD SUGAR
+    elif any(w in text for w in ["diabetes", "glucose", "blood sugar", "insulin", "hypo"]):
+        return ("**Diabetes and seizure risk:**\n\n"
+                "Hypoglycemia (low blood sugar) is a direct seizure trigger — the brain depends on glucose "
+                "and when levels drop below ~3 mmol/L, neurons become unstable and seizure threshold drops.\n\n"
+                "For people with both epilepsy and diabetes:\n"
+                "• Keep glucose stable — avoid skipping meals\n"
+                "• Check blood sugar more frequently during high-stress periods\n"
+                "• Carry fast-acting glucose (juice, glucose tablets)\n"
+                "• Inform your epilepsy team about your diabetes\n\n"
+                "Hyperglycemia (high blood sugar) can also increase seizure risk through osmotic changes in the brain.\n\n"
+                "⚕️ *Your neurologist and endocrinologist should coordinate your care.*")
+
+    # EXERCISE
+    elif any(w in text for w in ["exercise", "sport", "gym", "workout", "swim", "run", "physical"]):
+        return ("**Exercise and seizures:**\n\n"
+                "Regular moderate exercise is generally beneficial for people with epilepsy — "
+                "it improves sleep quality, reduces stress, and may improve seizure control through "
+                "increased GABA activity and reduced cortisol.\n\n"
+                "**Safe exercise tips:**\n"
+                "• Always exercise with someone who knows your condition\n"
+                "• Avoid swimming alone\n"
+                "• Stay hydrated — dehydration can trigger seizures\n"
+                "• Avoid overheating\n"
+                "• If seizures are poorly controlled, avoid heights and open water\n\n"
+                "**Post-exercise:** Intense exercise can sometimes trigger seizures in the recovery phase "
+                "due to metabolic changes. Log how you feel after workouts.\n\n"
+                "⚕️ *Ask your neurologist which activities are safe for your seizure type.*")
+
+    # MEDICATION TYPES
+    elif any(w in text for w in ["levetiracetam", "keppra", "valproate", "lamotrigine", "carbamazepine", "aed", "anti-epileptic"]):
+        return ("**Anti-epileptic medications (AEDs):**\n\n"
+                "I cannot give specific advice about individual medications — that must come from your neurologist.\n\n"
+                "What I can tell you is that AEDs work by:\n"
+                "• Reducing neuronal excitability (sodium/calcium channel blockers)\n"
+                "• Enhancing GABA inhibition\n"
+                "• Reducing glutamate activity\n\n"
+                "Missing doses causes blood levels to drop rapidly, which is the leading cause of breakthrough seizures.\n\n"
+                "⚕️ *Never change, skip, or stop medication without your neurologist's guidance.*")
+
+    # MOOD / MENTAL HEALTH
+    elif any(w in text for w in ["depress", "sad", "mood", "mental health", "emotion", "feel"]):
+        return ("**Mood, mental health, and epilepsy:**\n\n"
+                "Depression and anxiety are twice as common in people with epilepsy compared to the general population. "
+                "This is not just a reaction to having epilepsy — there is a shared neurobiological pathway.\n\n"
+                "Low mood can:\n"
+                "• Disrupt sleep, which raises seizure risk\n"
+                "• Increase cortisol, which lowers seizure threshold\n"
+                "• Lead to medication non-adherence\n\n"
+                "Tracking mood in SeizureSense helps identify whether emotional states correlate with your seizure days.\n\n"
+                "⚕️ *Tell your neurologist about mood changes — effective treatment exists and can improve seizure control too.*")
+
+    # HORMONES / MENSTRUAL
+    elif any(w in text for w in ["period", "menstrual", "hormone", "catamenial", "cycle", "pms"]):
+        return ("**Hormones and seizures (catamenial epilepsy):**\n\n"
+                "About 40% of women with epilepsy have catamenial epilepsy — where seizures cluster "
+                "around specific points in the menstrual cycle.\n\n"
+                "The science: estrogen is pro-excitatory (raises seizure risk) while progesterone "
+                "is neuroprotective (lowers seizure risk). The drop in progesterone just before "
+                "menstruation is when seizure risk peaks most commonly.\n\n"
+                "Tracking your cycle alongside seizure events in SeizureSense can reveal whether "
+                "you have a catamenial pattern.\n\n"
+                "⚕️ *Catamenial epilepsy is a recognized and treatable condition — ask your neurologist about it.*")
+
+    # WEATHER / TEMPERATURE
+    elif any(w in text for w in ["weather", "heat", "cold", "temperature", "hot", "humid"]):
+        return ("**Weather, temperature, and seizures:**\n\n"
+                "Some people with epilepsy report more seizures in extreme heat. Possible reasons:\n"
+                "• Dehydration from sweating lowers electrolytes\n"
+                "• Heat increases metabolic demand on neurons\n"
+                "• Poor sleep in hot weather reduces seizure threshold\n\n"
+                "Cold weather is generally less directly linked to seizures, but illness (fever) "
+                "during winter months is a well-documented trigger.\n\n"
+                "**Tips for hot weather:**\n"
+                "• Stay hydrated — drink water consistently\n"
+                "• Stay cool — avoid prolonged heat exposure\n"
+                "• Check medication storage — some AEDs degrade in heat\n\n"
+                "⚕️ *Track weather conditions alongside your logs to find your personal pattern.*")
+
     # DEFAULT
     else:
         return (f"I am not sure I understood that perfectly — but here is what I can help with:\n\n"
@@ -550,6 +686,10 @@ def chatbot_response(user_input):
                 f"• **Sleep** — ask 'why does sleep affect seizures?'\n"
                 f"• **Stress** — ask 'how does stress affect my risk?'\n"
                 f"• **Risk** — ask 'what is my risk tomorrow?'\n"
+                f"• **Duration** — ask 'how long do my seizures last?'\n"
+                f"• **First aid** — ask 'what to do during a seizure?'\n"
+                f"• **Exercise** — ask 'is exercise safe?'\n"
+                f"• **Mood** — ask 'how does mood affect seizures?'\n"
                 f"• **Doctor** — ask 'what should I tell my doctor?'\n\n"
                 f"You have {total_logs} days logged and {total_seizures} seizures recorded.\n\n"
                 f"⚕️ *I can make mistakes. Always verify important health information with your neurologist.*")
@@ -558,7 +698,7 @@ def chatbot_response(user_input):
 # SIDEBAR
 # ─────────────────────────────────────────────
 with st.sidebar:
-    st.markdown(f'<div class="main-header" style="font-size:1.5rem;">🧠 CERELOG</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="main-header" style="font-size:1.5rem;">🧠 SeizureSense</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="sub-header">Seizure Pattern Diary</div>', unsafe_allow_html=True)
     st.markdown("---")
 
@@ -606,8 +746,9 @@ if st.session_state.show_confetti:
     show_confetti()
     st.session_state.show_confetti = False
 
-st.markdown(f'<div class="main-header">CERELOG</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="sub-header">AI-powered seizure pattern diary — log, detect, predict</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="main-header">SeizureSense</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="sub-header">Know your brain. Predict your risk.</div>', unsafe_allow_html=True)
+st.markdown('<div style="font-size:0.75rem; color:#4a5568; font-family:monospace;">Built by Alankriti Khara | SeizureSense AI</div>', unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────
 # TABS
@@ -657,10 +798,26 @@ with tab1:
         medication = st.selectbox("💊 Medication taken", med_opts,
                                   index=med_opts.index(existing.get("medication", "Yes — on time")) if existing.get("medication") in med_opts else 0)
 
-        st.markdown("**⚡ Any known triggers today?**")
+        st.markdown("**⚡ Any known triggers today? (tap all that apply)**")
         trigger_checks = {}
-        for lt in LIFESTYLE_TRIGGERS[:7]:
-            trigger_checks[lt] = st.checkbox(lt, value=existing.get(f"trigger_{lt}", False))
+        # Show all triggers as toggle buttons in a grid
+        cols_per_row = 2
+        trigger_list = LIFESTYLE_TRIGGERS
+        for i in range(0, len(trigger_list), cols_per_row):
+            row_cols = st.columns(cols_per_row)
+            for j, col in enumerate(row_cols):
+                if i + j < len(trigger_list):
+                    lt = trigger_list[i + j]
+                    current = existing.get(f"trigger_{lt}", False)
+                    trigger_checks[lt] = col.checkbox(lt, value=current, key=f"trig_{log_date_str}_{lt}")
+
+    st.markdown("**🏥 Health conditions (affects risk calculation)**")
+    cond_cols = st.columns(3)
+    selected_conds = []
+    for i, cond in enumerate(CONDITIONS[1:]):  # skip "None"
+        with cond_cols[i % 3]:
+            if st.checkbox(cond, value=cond in existing.get("conditions", []), key=f"cond_{log_date_str}_{cond}"):
+                selected_conds.append(cond)
 
     notes = st.text_area("📝 Notes", value=existing.get("notes", ""),
                          placeholder="Anything unusual? Headache, aura, feeling off...", height=80)
@@ -669,7 +826,8 @@ with tab1:
         entry = {
             "sleep_hours": sleep_hours, "stress": stress, "food": food,
             "mood_am": mood_am, "mood_pm": mood_pm, "mood_eve": mood_eve,
-            "exercise": exercise, "medication": medication, "notes": notes
+            "exercise": exercise, "medication": medication, "notes": notes,
+            "conditions": selected_conds
         }
         for lt, val in trigger_checks.items():
             entry[f"trigger_{lt}"] = val
@@ -771,34 +929,46 @@ with tab3:
         df["date"] = pd.to_datetime(df["date"])
         seizure_days = df[df["had_seizure"] == True]
 
+        # Graph type selector
+        gcol1, gcol2, gcol3 = st.columns([1,1,2])
+        with gcol1:
+            graph_type = st.selectbox("Chart type", ["Line", "Bar", "Scatter"], key="graph_type")
+        with gcol2:
+            metric = st.selectbox("Metric", ["Sleep hours", "Stress", "Food quality"], key="graph_metric")
+
+        metric_map = {"Sleep hours": "sleep_hours", "Stress": "stress", "Food quality": "food"}
+        metric_col = metric_map[metric]
+        color_map_metric = {"sleep_hours": C['accent2'], "stress": C['warn'], "food": C['safe']}
+        chart_color = color_map_metric.get(metric_col, C['accent'])
+
+        fig = go.Figure()
+        if graph_type == "Line":
+            fig.add_trace(go.Scatter(x=df["date"], y=df[metric_col],
+                mode="lines+markers", line=dict(color=chart_color, width=2),
+                marker=dict(size=6), name=metric))
+        elif graph_type == "Bar":
+            fig.add_trace(go.Bar(x=df["date"], y=df[metric_col],
+                marker_color=chart_color, name=metric))
+        else:
+            fig.add_trace(go.Scatter(x=df["date"], y=df[metric_col],
+                mode="markers", marker=dict(color=chart_color, size=10), name=metric))
+
+        if not seizure_days.empty and metric_col in seizure_days.columns:
+            fig.add_trace(go.Scatter(x=seizure_days["date"], y=seizure_days[metric_col],
+                mode="markers", marker=dict(color=C['alert'], size=14, symbol="x-thin", line=dict(width=3)),
+                name="Seizure day"))
+
+        fig.update_layout(title=f"{metric} over time (× = seizure day)",
+            paper_bgcolor=C['bg'], plot_bgcolor=C['panel'],
+            font=dict(color=C['text'], size=11),
+            height=320, margin=dict(l=40,r=20,t=40,b=40))
+        st.plotly_chart(fig, use_container_width=True)
+
         col1, col2 = st.columns(2)
         with col1:
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(x=df["date"], y=df["sleep_hours"],
-                mode="lines+markers", line=dict(color=C['accent2'], width=2),
-                marker=dict(size=6), name="Sleep hrs"))
-            if not seizure_days.empty:
-                fig.add_trace(go.Scatter(x=seizure_days["date"], y=seizure_days["sleep_hours"],
-                    mode="markers", marker=dict(color=C['alert'], size=14, symbol="x-thin", line=dict(width=3)),
-                    name="Seizure day"))
-            fig.update_layout(title="Sleep Hours", paper_bgcolor=C['bg'],
-                plot_bgcolor=C['panel'], font=dict(color=C['text'], size=11),
-                height=260, margin=dict(l=40,r=20,t=40,b=40))
-            st.plotly_chart(fig, use_container_width=True)
-
+            pass
         with col2:
-            fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(x=df["date"], y=df["stress"],
-                mode="lines+markers", line=dict(color=C['warn'], width=2),
-                marker=dict(size=6), name="Stress"))
-            if not seizure_days.empty:
-                fig2.add_trace(go.Scatter(x=seizure_days["date"], y=seizure_days["stress"],
-                    mode="markers", marker=dict(color=C['alert'], size=14, symbol="x-thin", line=dict(width=3)),
-                    name="Seizure day"))
-            fig2.update_layout(title="Stress Level", paper_bgcolor=C['bg'],
-                plot_bgcolor=C['panel'], font=dict(color=C['text'], size=11),
-                height=260, margin=dict(l=40,r=20,t=40,b=40))
-            st.plotly_chart(fig2, use_container_width=True)
+            pass
 
         st.markdown("---")
         st.markdown('<div class="section-title">Your Top Triggers</div>', unsafe_allow_html=True)
@@ -845,7 +1015,7 @@ with tab4:
 
     for msg in st.session_state.chat_history:
         css_class = "user-bubble" if msg["role"] == "user" else "ai-bubble"
-        prefix = "You" if msg["role"] == "user" else "Cerelog AI"
+        prefix = "You" if msg["role"] == "user" else "SeizureSense AI"
         st.markdown(f'<div class="{css_class}"><strong>{prefix}:</strong> {msg["content"]}</div>',
                     unsafe_allow_html=True)
 
