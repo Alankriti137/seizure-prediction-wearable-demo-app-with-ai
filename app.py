@@ -565,7 +565,7 @@ def chatbot_response(user_input):
 with st.sidebar:
     st.markdown(f'<div class="main-header" style="font-size:1.5rem;">🧠 SEIZURESENSE</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="sub-header">Know your brain. Predict your risk.</div>', unsafe_allow_html=True)
-st.markdown(f'<div style="font-size:0.75rem; color:{C[\'dim\']}; font-family:Space Mono, monospace;">Built by [CHANGE THIS — your name]</div>', unsafe_allow_html=True)
+st.markdown(f'<div style="font-size:0.75rem; color:{C[\'dim\']}; font-family:Space Mono, monospace;">Built by Alankriti Khara</div>', unsafe_allow_html=True)
     st.markdown("---")
 
     st.markdown('<div class="section-title">Color Theme</div>', unsafe_allow_html=True)
