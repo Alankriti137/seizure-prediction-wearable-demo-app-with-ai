@@ -243,7 +243,12 @@ LIFESTYLE_TRIGGERS = [
     "Strobe / flashing lights", "Screens for long time", "Alcohol", "Caffeine",
     "Swimming", "Exercise — intense", "Illness / fever", "Menstrual cycle",
     "Travel / jet lag", "Loud music / concert", "Skipped breakfast",
-    "Dehydration", "Hot weather", "Emotional shock"
+    "Dehydration", "Hot weather", "Emotional shock",
+    "Missed meal", "High blood sugar", "Low blood sugar",
+    "Anxiety episode", "High stress day", "Sleep deprived",
+    "Missed medication", "Pain / migraine", "Photosensitive trigger",
+    "Alcohol consumed", "After exercise crash", "REM sleep disrupted",
+    "Mental overload / burnout"
 ]
 
 # ─────────────────────────────────────────────
